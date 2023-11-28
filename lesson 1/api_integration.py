@@ -16,7 +16,7 @@ response = openai.ChatCompletion.create(
         {
             "role": "user",
             "content": "Make 5 products"
-        }
+        }   
     ]
 )
 
