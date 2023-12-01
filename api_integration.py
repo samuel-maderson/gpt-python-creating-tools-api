@@ -1,24 +1,35 @@
 # This code is for v1 of the openai package: pypi.org/project/openai
 import openai
 from dotenv import load_dotenv
-import os
+import os, sys, tiktoken
 
 load_dotenv()
 
-def products_categorizer(product_name: str, product_categories: str):
 
-    openai.api_key = os.getenv("OPENAI_API_KEY")    
-    prompt_system = f"""
-        You're a product categorizer.
-        You must choose a category from the list below:
-        If the categories provided aren't valid categories, respond with "I can't help you with that"
-        ##### List of valid categories
-        {product_categories}
-        ##### Example
-        tennis ball
-        sports
 
-    """
+
+def load_data(input_file: str):
+    
+    with open(input_file, "r") as f:
+        data = f.read()
+        return data
+
+
+def products_categorizer(prompt_system: str, prompt_user: str):
+
+    
+    openai.api_key = os.getenv("OPENAI_API_KEY") 
+    model = "gpt-3.5-turbo"
+    expected_value = 2048
+    codifier = tiktoken.encoding_for_model(model)   
+    
+    tokens_count = len(codifier.encode(prompt_user))
+    print(f"Tokens count: {tokens_count}")
+
+
+    if tokens_count >= 4096 - expected_value:
+        model = "gpt-3.5-turbo-16k"
+
     response = openai.ChatCompletion.create(
         
         messages = [
@@ -28,13 +39,13 @@ def products_categorizer(product_name: str, product_categories: str):
             },
             {
                 "role": "user",
-                "content": product_name
+                "content": prompt_user
             }
         ],
 
-        model="gpt-3.5-turbo",
+        model=model,
         temperature=1,
-        max_tokens=256,
+        max_tokens=expected_value,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0,
@@ -43,16 +54,27 @@ def products_categorizer(product_name: str, product_categories: str):
     print(response.choices[0].message.content)
 
 
-while True:
-    try:
-        product_name = input("Product name: ")
-        product_categories = input("Product categories: ")
+if __name__ == "__main__":
 
-        products_categorizer(product_name, product_categories)
+    if len(sys.argv) < 2:
+        raise Exception("No data provided\nEx: python api_integration.py data.txt")
+    
+    data = sys.argv[1]
+    prompt_system = f"""
+        Identify the purchase profile for each client below.
+
+        The format of the output should be and also in English language:
+
+        Client - describe the client's purchase profile in 3 words
+    """
+    prompt_user = load_data(data)
+
+    try:
+        products_categorizer(prompt_system, prompt_user)
         
     except KeyboardInterrupt:
-        print("Exiting...")
-        break
+        print("\nExiting...")
+        sys.exit(0)
     except Exception as e:
         print(e)
-        break
+        sys.exit(0)
