@@ -19,52 +19,58 @@ def save_data(filename: str, data: str):
 
 
 
-def analyze_data(prompt_system: str, prompt_user: str, product_name: str):
+def analyze_data(prompt_system: str, product_name: list[str]):
 
     load_dotenv()
     openai.api_key = os.environ.get('OPENAI_API_KEY')
     model = 'gpt-3.5-turbo'
     expected_value = 2048
-    codifier = tiktoken.encoding_for_model(model)
-    tokens_count = len(codifier.encode(data))
 
-    if tokens_count >= 4096 - expected_value:
-        model = 'gpt-3.5-turbo-16k'
+    for product in range(len(product_name)):
+        data = load_data(f"./data/avaliacoes-{product_name[product]}.txt")    
+        codifier = tiktoken.encoding_for_model(model)
+        tokens_count = len(codifier.encode(data))
+
+        prompt_user = data
+        
+        if tokens_count >= 4096 - expected_value:
+            model = 'gpt-3.5-turbo-16k'
 
 
-    response = openai.ChatCompletion.create(
+        print(f"Analyzing product: {product_name[product]}")
+        response = openai.ChatCompletion.create(
 
-        model = 'gpt-3.5-turbo',
-        messages = [
-            {
-                "role": "system",
-                "content": prompt_system
-            },
-            {
-                "role": "user",
-                "content": prompt_user
-            }
-        ],
+            model = 'gpt-3.5-turbo',
+            messages = [
+                {
+                    "role": "system",
+                    "content": prompt_system
+                },
+                {
+                    "role": "user",
+                    "content": prompt_user
+                }
+            ],
 
-        temperature=1,
-        max_tokens=expected_value,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0
-    )
+            temperature=1,
+            max_tokens=expected_value,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
 
-    save_data(f"./data/reviews-{product_name}.txt", response.choices[0].message.content)
+        save_data(f"./data/reviews-{product_name[product]}.txt", response.choices[0].message.content)
+        print(f"Product: {product_name[product]} conclued with success!")
+
 
 if __name__ == '__main__':
 
-    if len(sys.argv) < 2:
-        print('Usage: python3 main.py <filename>')
-        sys.exit(1)
-    data = sys.argv[1]
-    product_name = data.split('-')[1]
-    product_name = product_name.split('.')[0]
-
-    prompt_user = load_data(data)
+    product_name = [
+        "Tapete de yoga", 
+        "Tabuleiro de xadrez de madeira", 
+        "Mixer de sucos e vitaminas"
+    ]
+    
     prompt_system = f"""
         You are a product review sentiment researcher.
         Write a paragraph of up to 50 words summarizing the reviews and then give the general feeling for the product.
@@ -81,4 +87,4 @@ if __name__ == '__main__':
         
         Weaknesses:
     """
-    analyze_data(prompt_system, prompt_user, product_name)
+    analyze_data(prompt_system, product_name)
