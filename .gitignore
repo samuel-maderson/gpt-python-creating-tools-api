@@ -130,6 +130,7 @@ env.bak/
 venv.bak/
 
 data/reviews-*
+./data
 
 # Spyder project settings
 .spyderproject

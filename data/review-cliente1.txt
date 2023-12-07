@@ -1,0 +1,15 @@
+Hello cliente1,
+
+I hope you're having a great day! I understand that you have an interest in Fashion, Fitness, and Art. I have some fantastic product recommendations for you in these categories. Let's get started!
+
+Product 1: 
+Name: Stylish Gym Bag
+Description: This gym bag has it all! It's trendy, practical, and spacious enough to fit all your workout essentials. With multiple compartments and a durable design, this bag will not only keep you organized but also make a fashion statement at the gym. Stay stylish while staying fit with this must-have accessory!
+
+Product 2: 
+Name: Fitness Tracker Watch
+Description: This cutting-edge fitness tracker watch is the perfect companion for your fitness journey. It can track your steps, monitor your heart rate, and even provide insights into your sleep patterns. With its sleek design and intuitive interface, it's not just a fitness gadget but also a stylish accessory that you can wear every day. Stay motivated and on top of your fitness goals with this incredible device!
+
+Product 3: 
+Name: Professional Art Set
+Description: Unleash your creativity with this high-quality art set. It includes a wide range of paint brushes, sketching pencils, and vibrant colors that will take your artistic skills to
