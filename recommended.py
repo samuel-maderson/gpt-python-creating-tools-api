@@ -6,6 +6,8 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 
+
+
 def load_data(filename: str):
 
     try:
@@ -17,15 +19,21 @@ def load_data(filename: str):
         print(f"\033[1;31m[-] \033[0mError loading data from {filename}: {e}")
 
 
+
+
+
 def save_data(filename: str, data: str):
 
     try:
         print(f"\033[1;32m[+] \033[0mSaving data to {filename}")
 
-        with open(f'./data/review-{filename}.txt', 'w') as file:
+        with open(f'./data/mail-{filename}.txt', 'w') as file:
             file.write(data)
     except IOError as e:
         print(f"\033[1;31m[-] \033[0mError saving data to {filename}: {e}")
+
+
+
 
 
 def analyze_profiles(prompt_user: str):
@@ -57,11 +65,6 @@ def analyze_profiles(prompt_user: str):
                     "content": prompt_user
                 }
             ],
-            temperature=1,
-            max_tokens=256,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0
         )
 
         return response.choices[0].message.content
@@ -70,6 +73,7 @@ def analyze_profiles(prompt_user: str):
         print(f"\033[1;31m[-] \033[0mError connecting to OpenAI API: {e}")
     except Exception as e:
         print(f"\033[1;31m[-] \033[0mError analyzing profiles: {e}")
+
 
 
 
@@ -104,14 +108,41 @@ def recommend_products(profile: str, products_list: str):
                 "content": prompt_system
             }
         ],
-        temperature=1,
-        max_tokens=256,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0
     )
     
     return response.choices[0].message.content
+
+
+
+
+
+def write_mail(recommendations: str):
+
+    print("\033[1;32m[+]\033[0m Writing recommendation mail")
+    prompt_system = f"""
+        Write an email recommending the following products to a customer:
+            
+        {recommendations}
+
+        The email must have a maximum of 3 paragraphs.
+        The tone should be friendly, informal and relaxed.
+        Treat the customer as someone close and known.
+    """
+
+    response = openai.ChatCompletion.create(
+
+        model="gpt-3.5-turbo-16k",
+        messages=[
+            {
+                "role": "system",
+                "content": prompt_system
+            }
+        ],
+    )
+    
+    return response.choices[0].message.content
+
+
 
 
 
@@ -124,9 +155,8 @@ if __name__ == '__main__':
 
     for client in profiles['clients']:
         print(f"\033[1;32m[+] \033[0mRunning on client: {client['name']}\033[0m")
-        products = response = recommend_products(client['profile'], product_list)
+        recommendations = response = recommend_products(client['profile'], product_list)
         print(f"\033[1;32m[+] \033[0mFinished on client: {client['name']}")
-        print(f"{products}")
-        
-        
-        
+        print(f"{recommendations}")
+        mail_data = write_mail(recommendations)
+        save_data(client['name'], mail_data)
